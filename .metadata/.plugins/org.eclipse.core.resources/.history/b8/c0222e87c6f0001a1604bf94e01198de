@@ -1,0 +1,31 @@
+package com.nikhil.phase3.controllers;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
+
+@FeignClient("company-service")
+public interface CompanyClient {
+
+	@GetMapping("/companies/getAll")
+	public ResponseEntity<List<Object>> getAllCompanies();
+
+	@PostMapping("/companies/create")
+	public ResponseEntity<Object> createCompany(@RequestBody Object companyRequestModel);
+
+	@GetMapping("/companies/getCompanyStockPrice/{companyId}/from/{from}/to/{to}")
+	public ResponseEntity<List<Object>> getCompanyStockPrice(@PathVariable Integer companyId,
+			@PathVariable LocalDateTime from, @PathVariable LocalDateTime to);
+
+	@PostMapping("/excel-upload")
+	public ResponseEntity<String> uploadExcel(MultipartFile file);
+
+	public ResponseEntity<Object> updateCompany(Object companyRequestModel);
+}

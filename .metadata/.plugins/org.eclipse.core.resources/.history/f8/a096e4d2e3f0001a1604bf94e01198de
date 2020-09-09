@@ -1,0 +1,19 @@
+package com.nikhil.phase3.controllers;
+
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@FeignClient("company-service")
+public interface StockExchangeClient {
+
+	@GetMapping("/exchanges/getAll")
+	public ResponseEntity<List<Object>> getStockExchangesList();
+	
+	@PostMapping("/exchanges/create")
+	public ResponseEntity<Object> createStockExchange(@RequestBody Object stockExchangeRequestModel);
+}

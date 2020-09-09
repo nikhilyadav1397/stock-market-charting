@@ -1,0 +1,14 @@
+package com.nikhil.phase3.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.nikhil.phase3.dto.StockDto;
+
+public interface StockService {
+    public StockDto addStock(StockDto stockDto);
+    public Iterable<StockDto> findAll();
+    public List<StockDto> getStockByCompanyCode(String stockCode);
+    public List<StockDto> getStockByCompanyCodeOverPeriod(String companyCode, LocalDateTime localDateStart, LocalDateTime localDateEnd);
+    public boolean ifExistsById(String id);
+}

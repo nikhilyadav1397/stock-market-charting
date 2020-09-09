@@ -1,0 +1,72 @@
+package com.nikhil.phase3.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.nikhil.phase3.dto.StockExchangeDto;
+import com.nikhil.phase3.service.StockExchangeService;
+
+@RestController
+@RequestMapping("exchanges")
+public class StockExchangeController {
+
+	public StockExchangeController(StockExchangeService stockExchangeService) {
+		this.stockExchangeService = stockExchangeService;
+	}
+
+	@Autowired
+	private StockExchangeService stockExchangeService;
+
+	@GetMapping("/getAll")
+	public ResponseEntity<List<StockExchangeDto>> getStockExchangesList() {
+		return new ResponseEntity<List<StockExchangeDto>>(stockExchangeService.getStockExchangesList(), HttpStatus.OK);
+	}
+
+	@PostMapping("/create")
+	@Transactional
+	public ResponseEntity<StockExchangeDto> createStockExchange(@RequestBody StockExchangeDto stockExchangeDto) {
+		if (!stockExchangeService.existsByStockExchange(stockExchangeDto.getStockExchange())) {
+			return new ResponseEntity<StockExchangeDto>(stockExchangeService.createStockExchange(stockExchangeDto),
+					HttpStatus.OK);
+		}
+		return new ResponseEntity<StockExchangeDto>(new StockExchangeDto("", "Stock Exchange already exists", "", ""),
+				HttpStatus.BAD_REQUEST);
+	}
+
+	@DeleteMapping("/delete/{exchangeId}")
+	@Transactional
+	public ResponseEntity<StockExchangeDto> deleteStockExchange(@PathVariable String exchangeId) {
+		if (stockExchangeService.existsById(exchangeId)) {
+			System.out.println("==========DEBUG=============");
+			return new ResponseEntity<StockExchangeDto>(stockExchangeService.deleteStockExchange(exchangeId),
+					HttpStatus.OK);
+		}
+		return new ResponseEntity<StockExchangeDto>(HttpStatus.NOT_FOUND);
+	}
+
+	@PostMapping("/update")
+	@Transactional
+	public ResponseEntity<StockExchangeDto> editStockExchange(@RequestBody StockExchangeDto stockExchangeDto) {
+		if (stockExchangeService.existsById(stockExchangeDto.getExchangeId())) {
+			return new ResponseEntity<StockExchangeDto>(stockExchangeService.createStockExchange(stockExchangeDto),
+					HttpStatus.OK);
+		}
+		return new ResponseEntity<StockExchangeDto>(HttpStatus.NOT_FOUND);
+	}
+
+	@GetMapping("/getAllCompanyExchanges/{companyId}")
+	public ResponseEntity<List<StockExchangeDto>> getAllCompanyExchanges(@PathVariable String companyId){
+		return new ResponseEntity<List<StockExchangeDto>>(stockExchangeService.getAllCompanyExchanges(companyId), HttpStatus.OK);
+	}
+}

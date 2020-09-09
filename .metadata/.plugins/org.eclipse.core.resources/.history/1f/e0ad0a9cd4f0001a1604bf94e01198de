@@ -1,0 +1,49 @@
+package com.nikhil.phase3.controllers;
+
+import java.util.List;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@FeignClient("company-service")
+public interface CompanyClient {
+
+	@GetMapping("/companies/getAll")
+	public ResponseEntity<List<Object>> getAllCompanies();
+
+	@PostMapping("/companies/create")
+	public ResponseEntity<Object> createCompany(@RequestBody Object companyRequestModel);
+
+	@PutMapping("/companies/update/{companyId}")
+	public ResponseEntity<Object> updateCompany(@RequestBody Object companyRequestModel,
+			@PathVariable String companyId);
+
+	@DeleteMapping("/companies/delete/{companyId}")
+	public ResponseEntity<String> deleteCompany(@PathVariable String companyId);
+
+	@PostMapping("/companies/stocks/create/{companyName}")
+	public ResponseEntity<Object> addStock(@RequestBody Object stockRequestModel, @PathVariable String companyName);
+
+//	@GetMapping("/companies/getCompanyStockPrice/{companyId}/from/{from}/to/{to}")
+//	public ResponseEntity<List<Object>> getCompanyStockPrice(@PathVariable Integer companyId,
+//			@PathVariable LocalDateTime from, @PathVariable LocalDateTime to);
+
+	@GetMapping("/companies/stocks/{companyCode}")
+	public ResponseEntity<Object> getStock(@PathVariable String companyCode);
+
+	@GetMapping("/companies/findByName/{companyName}")
+	public ResponseEntity<Object> getCompanyByName(@PathVariable String companyName);
+
+	@GetMapping("/companies/findByPattern/{pattern}")
+	public ResponseEntity<List<Object>> searchCompany(@PathVariable String pattern);
+
+	@GetMapping("/companies/stock/{fromDateTime}/{toDateTime}")
+	public ResponseEntity<Object> getCompanyStockPrice(@RequestBody Object companyRequestModel,
+			@PathVariable String fromDateTime, String toDateTime);
+}

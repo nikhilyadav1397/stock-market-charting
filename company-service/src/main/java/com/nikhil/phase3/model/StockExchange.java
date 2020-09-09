@@ -1,0 +1,33 @@
+package com.nikhil.phase3.model;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StockExchange {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+	private String exchangeId;
+    private String stockExchange;
+    private String brief;
+    private String contactAddress;
+    private String remarks;
+
+    public StockExchange(String stockExchange, String brief, String contactAddress, String remarks) {
+        this.stockExchange = stockExchange;
+        this.brief = brief;
+        this.contactAddress = contactAddress;
+        this.remarks = remarks;
+    }
+}

@@ -1,0 +1,24 @@
+<div class="text-center m-3">
+    <h2> Add Stock Exchange</h2>
+</div>
+<form #exchangeForm="ngForm" class="m-5">
+    <div class="form-group">
+        <label for="stockExchange">Company Name</label>
+        <input required id="my-input" class="form-control" type="text" name="stockExchange" minlength="3"
+            [(ngModel)]="exchange.stockExchange">
+    </div>
+    <div class="form-group">
+        <label>Brief</label>
+        <input class="form-control" type="text" name="brief" [(ngModel)]="exchange.brief">
+    </div>
+    <div class="form-group">
+        <label>Contact Address</label>
+        <input required class="form-control" type="text" name="contactAddress" [(ngModel)]="exchange.contactAddress">
+    </div>
+    <div class="form-group">
+        <label>Remarks</label>
+        <input required class="form-control" type="text" name="remarks" [(ngModel)]="exchange.remarks">
+    </div>
+    <button type="button" class="btn btn-success btn-block" [disabled]="exchangeForm.form.invalid" (click)="addExchange()"> Add Exchange
+    </button>
+</form>

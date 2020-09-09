@@ -1,0 +1,31 @@
+package com.nikhil.phase3.controllers;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/stockExchanges")
+public class StockExchangeZuulController {
+
+	private StockExchangeClient stockExchangeClient;
+
+	public StockExchangeZuulController(StockExchangeClient stockExchangeClient) {
+		this.stockExchangeClient = stockExchangeClient;
+	}
+
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Object>> getStockExchangesList() {
+		return stockExchangeClient.getStockExchangesList();
+	}
+	
+	@PostMapping("create")
+	public ResponseEntity<Object> createStockExchange(@RequestBody Object stockExchangeRequestModel){
+		return stockExchangeClient.createStockExchange(stockExchangeRequestModel);
+	}
+}

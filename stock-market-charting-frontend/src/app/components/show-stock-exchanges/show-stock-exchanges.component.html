@@ -1,0 +1,32 @@
+<div class="card">
+    <div class="card-body">
+        <table class="table ">
+            <thead class="bg-dark text-light">
+                <tr>
+                    <td>Name</td>
+                    <td>Brief</td>
+                    <td>Contact Address</td>
+                    <td>Remarks</td>
+                    <td>Companies</td>
+                    <td>Update</td>
+                    <td>Delete</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> {{exchange.stockExchange}}</td>
+                    <td> {{exchange.brief}}</td>
+                    <td> {{exchange.contactAddress}}</td>
+                    <td> {{exchange.remarks}}</td>
+                    <td><button class="btn btn-primary" (click)="showCompanies(exchange)">Companies</button></td>
+                    <td><button class="btn btn-primary" (click)="updateExchange(exchange)">Update</button></td>
+                    <td><button class="btn btn-primary" (click)="deleteExchange()">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <!-- <div class="container" *ngIf="showStocks">
+            <app-show-stocks [where]="'exchange'" [companyName]="this.company.companyName"></app-show-stocks>
+        </div> -->
+    </div>
+</div>

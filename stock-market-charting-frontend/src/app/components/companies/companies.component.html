@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand-md navbar-light bg-light">
+  <ul class="navbar-nav">
+    <li class="ml-2">
+      <button class="btn btn-primary" (click)="onAdd()">Add New Company</button>
+    </li>
+  </ul>
+</nav>
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <div *ngFor="let company of companies">
+        <app-show-companies [company]="company"></app-show-companies>
+      </div>
+    </div>
+  </div>
+</div>

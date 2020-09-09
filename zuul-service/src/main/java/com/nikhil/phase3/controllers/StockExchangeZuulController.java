@@ -1,0 +1,46 @@
+package com.nikhil.phase3.controllers;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/exchanges")
+@CrossOrigin(origins = { "http://localhost:4200"})
+public class StockExchangeZuulController {
+
+	private CompanyClient companyClient;
+
+	public StockExchangeZuulController(CompanyClient stockExchangeClient) {
+		this.companyClient = stockExchangeClient;
+	}
+
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Object>> getStockExchangesList() {
+		return companyClient.getStockExchangesList();
+	}
+	
+	@PostMapping("/create")
+	public ResponseEntity<Object> createStockExchange(@RequestBody Object stockExchangeRequestModel){
+		return companyClient.createStockExchange(stockExchangeRequestModel);
+	}
+	
+	@DeleteMapping("/delete/{exchangeId}")
+	public ResponseEntity<Object> deleteStockExchange(@PathVariable String exchangeId){
+		return companyClient.deleteStockExchange(exchangeId);
+	}
+	
+	@PostMapping("/update")
+	public ResponseEntity<Object> updateStockExchange(@RequestBody Object stockExchangeRequestModel){
+		return companyClient.updateStockExchange(stockExchangeRequestModel);
+	}
+	
+}

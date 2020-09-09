@@ -1,0 +1,35 @@
+<div class="card">
+    <div class="card-body">
+        <table class="table ">
+            <thead class="bg-dark text-light">
+                <tr>
+                    <td>Name</td>
+                    <td>CEO</td>
+                    <td>Brief</td>
+                    <td>Sector</td>
+                    <td>Stocks</td>
+                    <td>Update</td>
+                    <td>Delete</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td> {{company.companyName}}</td>
+                    <td> {{company.ceo}}</td>
+                    <td> {{company.brief}}</td>
+                    <td> {{company.sector}}</td>
+                    <td><button class="btn btn-primary" (click)="showStock(company)">Stocks</button></td>
+                    <td><button class="btn btn-primary" (click)="updateCompany(company)">Update</button></td>
+                    <td><button class="btn btn-primary" (click)="deleteCompany()">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <hr>
+        <div class="container" *ngIf="showIpos">
+            <app-ipo [where]="'company'" [companyName]="this.company.companyName"></app-ipo>
+        </div>
+        <div class="container" *ngIf="showStocks">
+            <app-show-stocks [where]="'company'" [companyName]="this.company.companyName"></app-show-stocks>
+        </div>
+    </div>
+</div>

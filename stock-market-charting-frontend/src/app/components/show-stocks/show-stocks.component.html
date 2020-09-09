@@ -1,0 +1,13 @@
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle m-2" type="button" id="dropdownMenuButton" data-toggle="dropdown">
+        Select Stock Exchange
+    </button>
+    <div class="dropdown-menu">
+        <a *ngFor="let exchange of company.stockExchanges"></a>
+    </div>
+</div>
+
+
+<div *ngIf="exchangeSelected">
+
+</div>

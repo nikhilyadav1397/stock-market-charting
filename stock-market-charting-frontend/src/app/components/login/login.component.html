@@ -1,0 +1,19 @@
+<div class="text-center">
+    <h4>Login</h4>
+    <form #userForm="ngForm" class="m-4">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input required id="my-input" class="form-control" type="text" name="username" minlength="5"
+                [(ngModel)]="username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input required id="my-input" class="form-control" type="text" name="password" minlength="6"
+                [(ngModel)]="password">
+        </div>
+        <button type="button" class="btn btn-success btn-block" [disabled]="userForm.form.invalid" (click)="login()"> Login
+        </button>
+        <button type="button" class="btn btn-success btn-block" [routerLink]="['/signup']" routerLinkActive="router-link-active" > Signup
+        </button>
+    </form>
+</div>

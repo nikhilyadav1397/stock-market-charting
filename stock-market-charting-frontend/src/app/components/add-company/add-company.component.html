@@ -1,0 +1,24 @@
+<div class="text-center m-3">
+    <h2> Add Company</h2>
+</div>
+<form #companyForm="ngForm" class="m-5">
+    <div class="form-group">
+        <label for="companyName">Company Name</label>
+        <input required id="my-input" class="form-control" type="text" name="companyName" minlength="3"
+            [(ngModel)]="company.companyName">
+    </div>
+    <div class="form-group">
+        <label>Brief</label>
+        <input class="form-control" type="text" name="brief" [(ngModel)]="company.brief">
+    </div>
+    <div class="form-group">
+        <label>CEO</label>
+        <input required class="form-control" type="text" name="ceo" [(ngModel)]="company.ceo">
+    </div>
+    <div class="form-group">
+        <label>Sector</label>
+        <input required class="form-control" type="text" name="sector" [(ngModel)]="company.sector">
+    </div>
+    <button type="button" class="btn btn-success btn-block" [disabled]="companyForm.form.invalid" (click)="addCompany()"> Add Company
+    </button>
+</form>

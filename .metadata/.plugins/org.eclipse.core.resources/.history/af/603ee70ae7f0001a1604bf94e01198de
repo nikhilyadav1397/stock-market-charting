@@ -1,0 +1,60 @@
+package com.nikhil.phase3.service;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.stereotype.Service;
+
+import com.nikhil.phase3.dto.StockExchangeDto;
+import com.nikhil.phase3.model.StockExchange;
+import com.nikhil.phase3.repository.StockExchangeRepository;
+
+@Service
+public class StockExchangeServiceImpl implements StockExchangeService {
+
+    private StockExchangeRepository stockExchangeRepo;
+    private ModelMapper mapper;
+
+    public StockExchangeServiceImpl(StockExchangeRepository stockExchangeRepository, ModelMapper modelMapper) {
+        this.stockExchangeRepo = stockExchangeRepository;
+        this.mapper = modelMapper;
+    }
+
+    @Override
+    public List<StockExchangeDto> getStockExchangesList() {
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        Type listType = new TypeToken<List<StockExchangeDto>>(){}.getType();
+        List<StockExchangeDto> stockExchangeDtoList = mapper.map(stockExchangeRepo.findAll(),listType);
+        return stockExchangeDtoList;
+    }
+
+    @Override
+    public StockExchangeDto createStockExchange(StockExchangeDto stockExchangeDto) {
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        stockExchangeDto.setExchangeId(UUID.randomUUID().toString());
+        StockExchange result =  stockExchangeRepo.save(mapper.map(stockExchangeDto,StockExchange.class));
+        return mapper.map(result,StockExchangeDto.class);
+    }
+
+    @Override
+    public StockExchangeDto deleteStockExchange(String id) {
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        StockExchangeDto result =  mapper.map(stockExchangeRepo.findByExchangeId(id).get(),StockExchangeDto.class);
+        stockExchangeRepo.deleteByExchangeId(id);
+        return result;
+    }
+
+    @Override
+    public boolean existsById(String id) {
+        return stockExchangeRepo.existsByExchangeId(id);
+    }
+
+    @Override
+    public boolean existsByStockExchange(String stockExchange) {
+        return stockExchangeRepo.existsByStockExchange(stockExchange);
+    }
+}

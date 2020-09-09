@@ -1,0 +1,49 @@
+package com.nikhil.phase3.service;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.UUID;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.modelmapper.convention.MatchingStrategies;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.nikhil.phase3.controller.CompanyClient;
+import com.nikhil.phase3.dto.StockExchangeDto;
+import com.nikhil.phase3.model.StockExchange;
+import com.nikhil.phase3.repository.StockExchangeRepository;
+
+@Service
+public class StockExchangeServiceImpl implements StockExchangeService {
+	
+	private StockExchangeRepository repo;
+	private ModelMapper modelMapper;
+	private CompanyClient companyClient;
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	@Override
+	public List<StockExchangeDto> getStockExchangesList() {
+		Type listType = new TypeToken<List<StockExchangeDto>>(){}.getType();
+		List<StockExchangeDto> map = modelMapper.map(repo.findAll(), listType);
+		return map;
+	}
+	
+	@Override
+	public StockExchangeDto createStockExchangesList(StockExchangeDto requestModel) {
+		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+		StockExchange map = modelMapper.map(requestModel, StockExchange.class);
+		map.setExchangeId(UUID.randomUUID().toString());
+		repo.save(map);
+		logger.info("Request Model -> {}", requestModel);
+		StockExchangeDto responseModel = modelMapper.map(map, StockExchangeDto.class);
+		return responseModel;
+	}
+
+	public List<Object> getCompanies(Integer exchangeId) {
+		return companyClient.getCompanies();
+	}
+
+}

@@ -1,0 +1,243 @@
+package com.nikhil.phase3.controller;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.nikhil.phase3.dto.CompanyAndTimePeriodsDto;
+import com.nikhil.phase3.dto.CompanyDto;
+import com.nikhil.phase3.dto.StockDto;
+import com.nikhil.phase3.service.CompanyService;
+import com.nikhil.phase3.service.StockService;
+
+@RestController
+@RequestMapping("companies")
+public class CompanyController {
+
+	private CompanyService companyService;
+	private StockService stockService;
+
+	public CompanyController(CompanyService companyService, StockService stockService) {
+		this.companyService = companyService;
+		this.stockService = stockService;
+	}
+
+	@GetMapping("/getAll")
+	@Transactional
+	public ResponseEntity<List<CompanyDto>> getAllCompanies() {
+		return new ResponseEntity<List<CompanyDto>>(companyService.getAllCompanies(), HttpStatus.OK);
+	}
+
+	@GetMapping("/get/{companyId}")
+	@Transactional
+	public ResponseEntity<CompanyDto> getCompany(@PathVariable String companyId) {
+		return new ResponseEntity<CompanyDto>(companyService.getCompany(companyId), HttpStatus.OK);
+	}
+	
+	@PostMapping("/create")
+	@Transactional
+	public ResponseEntity<CompanyDto> createCompany(@RequestBody CompanyDto companyDto) {
+		if (companyService.companyNameExists(companyDto.getCompanyName())) {
+			CompanyDto failResult = new CompanyDto();
+			failResult.setCompanyName("Company name is taken.");
+			return new ResponseEntity<CompanyDto>(failResult, HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<CompanyDto>(companyService.createCompany(companyDto), HttpStatus.OK);
+	}
+
+	@PostMapping("/stocks/create/{companyName}")
+	@Transactional
+	public ResponseEntity<StockDto> addStock(@RequestBody StockDto stockDto,
+			@PathVariable("companyName") String companyName) {
+		CompanyDto companyDto = companyService.getCompanyByName(companyName);
+		stockService.addStock(stockDto);
+		List<String> stockExchanges = companyDto.getStockExchanges();
+		List<String> companyCodes = companyDto.getCodeInStockExchange();
+		if (!stockExchanges.contains(stockDto.getStockExchange())) {
+//			System.out.println(companyDto.getStockExchanges());
+			companyCodes.add(stockDto.getCompanyCode());
+			stockExchanges.add(stockDto.getStockExchange());
+			companyService.updateCompany(companyDto, companyDto.getCompanyId());
+		}
+		return new ResponseEntity<StockDto>(stockDto, HttpStatus.OK);
+	}
+
+	@PutMapping("/update/{companyId}")
+	@Transactional
+	public ResponseEntity<CompanyDto> updateCompany(@RequestBody CompanyDto companyDto,
+			@PathVariable("companyId") String companyId) {
+		return new ResponseEntity<CompanyDto>(companyService.updateCompany(companyDto, companyId), HttpStatus.OK);
+
+	}
+
+	@DeleteMapping("/delete/{companyId}")
+	@Transactional
+	public ResponseEntity<String> deleteCompany(@PathVariable("companyId") String companyId) {
+		companyService.deleteCompany(companyId);
+		return new ResponseEntity<String>("Successfully Deleted!!!", HttpStatus.OK);
+	}
+
+	@GetMapping("/findByPattern/{pattern}")
+	public ResponseEntity<List<CompanyDto>> searchCompany(@PathVariable("pattern") String pattern) {
+		return new ResponseEntity<List<CompanyDto>>(companyService.searchByPattern(pattern), HttpStatus.OK);
+	}
+
+	@GetMapping("/findByName/{companyName}")
+	public ResponseEntity<List<Object>> getCompanyByName(@PathVariable("companyName") String companyName) {
+		List<Object> result = new ArrayList<>();
+		if (companyService.companyNameExists(companyName)) {
+			CompanyDto companyDetails = companyService.getCompanyByName(companyName);
+			result.add(companyDetails);
+			List<String> companyCodes = companyDetails.getCodeInStockExchange();
+			for (int i = 0; i < companyCodes.size(); i++) {
+				StockDto latestStock = getCompanyStockPrice(companyCodes.get(i)).getBody();
+				result.add(latestStock);
+			}
+			return new ResponseEntity<List<Object>>(result, HttpStatus.OK);
+		}
+		return new ResponseEntity<List<Object>>(HttpStatus.NOT_FOUND);
+	}
+
+	@GetMapping("/stocks/{companyCode}")
+	public ResponseEntity<StockDto> getCompanyStockPrice(@PathVariable("companyCode") String companyCode) {
+		List<StockDto> stocks = stockService.getStockByCompanyCode(companyCode);
+		if (stocks.size() > 0) {
+			return new ResponseEntity<StockDto>(stocks.get(stocks.size() - 1), HttpStatus.OK);
+		}
+		return new ResponseEntity<StockDto>(HttpStatus.NOT_FOUND);
+	}
+
+	@GetMapping("/stock/{companyName}/{exchange}/{fromDateTime}/{toDateTime}")
+	public ResponseEntity<Object> getCompanyStockPrice(@PathVariable String companyName, @PathVariable String exchange,
+			@PathVariable String fromDateTime, @PathVariable String toDateTime) {
+		CompanyDto companyDto = companyService.getCompanyByName(companyName);
+		int noOfStockExchanges = companyDto.getCodeInStockExchange().size();
+		List<List<StockDto>> result = new ArrayList<List<StockDto>>();
+		for (int i = 0; i < noOfStockExchanges; i++) {
+			String companyCode = companyDto.getCodeInStockExchange().get(i);
+			LocalDateTime localDateStart = LocalDateTime.parse(fromDateTime);
+			LocalDateTime localDateEnd = LocalDateTime.parse(toDateTime);
+			List<StockDto> x = stockService.getStockByCompanyCodeOverPeriod(companyCode, exchange, localDateStart,
+					localDateEnd);
+			result.add(x);
+		}
+		return ResponseEntity.ok().body(result);
+	}
+
+//	// findCompaniesBySector
+//	@GetMapping("/sector/{sectorName}")
+//	public ResponseEntity<List<CompanyDto>> getCompaniesBySector(@PathVariable("sectorName") String sectorName) {
+//		return ResponseEntity.ok().body(companyService.getCompanyBySector(sectorName));
+//	}
+//
+//	// C for each company in a sector do A
+//	@GetMapping("/stock/sector/{sector}/{periodData}")
+//	public ResponseEntity<Object> getCompanyStockPricesBySector(@PathVariable("sector") String sector,
+//			@PathVariable("periodData") String periodData) {
+//		List<CompanyDto> companyDtoList = getCompaniesBySector(sector).getBody();
+//		return ResponseEntity.ok().body(getCompaniesStockPrice(companyDtoList, periodData).getBody());
+//	}
+//
+//	@GetMapping("/stock/sector/multiple/{periodData}")
+//	public ResponseEntity<Object> getStockPricesBySectors(@RequestBody String[] sectors,
+//			@PathVariable("periodData") String periodData) {
+//		List<Object> result = new ArrayList<>();
+//		for (int i = 0; i < sectors.length; i++) {
+//			result.add(getCompanyStockPricesBySector(sectors[i], periodData).getBody());
+//		}
+//		return ResponseEntity.ok().body(result);
+//	}
+//
+//	@GetMapping("/stock/multiPeriods")
+//	public ResponseEntity<List<Object>> getStockPricesForCompanyOverPeriods(
+//			@RequestBody CompanyAndTimePeriodsDto companyAndPeriodData) {
+//		CompanyDto companyDto = companyAndPeriodData.getCompanyDto();
+//		List<String> periods = companyAndPeriodData.getTimePeriods();
+//		List<Object> result = new ArrayList<>();
+//		for (int i = 0; i < periods.size(); i++) {
+//			result.add(getCompanyStockPrice(companyDto, periods.get(i)).getBody());
+//		}
+//		return ResponseEntity.ok().body(result);
+//	}
+//
+//	@GetMapping("/stock/sector/multiPeriods")
+//	public ResponseEntity<List<Object>> getStockPricesForSectorOverPeriods(
+//			@RequestBody CompanyAndTimePeriodsDto companyAndPeriodData) {
+//		String sector = companyAndPeriodData.getCompanyDto().getSector();
+//		List<String> periods = companyAndPeriodData.getTimePeriods();
+//		List<Object> result = new ArrayList<>();
+//		for (int i = 0; i < periods.size(); i++) {
+//			result.add(getCompanyStockPricesBySector(sector, periods.get(i)).getBody());
+//		}
+//		return ResponseEntity.ok().body(result);
+//	}
+//
+//	// Do B and C
+//	@GetMapping("/stock/sectorAndCompany/{sector}/{periodData}")
+//	public ResponseEntity<List<Object>> getStockPricesForBothCompanyAndSector(@RequestBody CompanyDto companyDto,
+//			@PathVariable String sector, @PathVariable String periodData) {
+//		List<Object> result = new ArrayList<>();
+//		result.add(getCompanyStockPrice(companyDto, periodData).getBody());
+//		result.add(getCompanyStockPricesBySector(sector, periodData).getBody());
+//		return ResponseEntity.ok().body((result));
+//	}
+//
+//	@GetMapping("/please/work/{stockExchange}")
+//	public ResponseEntity<List<CompanyDto>> getCompaniesInStockExchange(
+//			@PathVariable("stockExchange") String stockExchange) {
+//		return ResponseEntity.ok().body(companyService.getCompanyByStockExchange(stockExchange));
+//	}
+//
+//	@PostMapping("/stockExchange/delete/{companyName}/{stockExchange}")
+//	@Transactional
+//	public ResponseEntity<CompanyDto> removeStockExchangeFromCompany(
+//			@PathVariable("stockExchange") String stockExchange, @PathVariable("companyName") String companyName) {
+//		if (companyService.companyNameExists(companyName)) {
+//			CompanyDto temp = companyService.getCompanyByName(companyName);
+//			int index = temp.getStockExchanges().indexOf(stockExchange);
+//			if (index == -1) {
+//				return ResponseEntity.badRequest()
+//						.body(new CompanyDto("", "Stock Exchange Absent", "", "", null, "", "", null));
+//			}
+//			temp.getStockExchanges().remove(index);
+//			temp.getCodeInStockExchange().remove(index);
+//			CompanyDto result = companyService.updateCompany(temp, temp.getCompanyId());
+//			return ResponseEntity.ok().body(result);
+//		}
+//		return ResponseEntity.notFound().build();
+//	}
+//
+	@PostMapping("/addExchange/{companyName}/{stockExchange}/{companyCode}")
+	@Transactional
+	public ResponseEntity<CompanyDto> addStockExchangeFromCompany(@PathVariable String stockExchange,
+			@PathVariable String companyName, @PathVariable String companyCode) {
+		if (companyService.companyNameExists(companyName)) {
+			CompanyDto dto = companyService.getCompanyByName(companyName);
+			int index = dto.getStockExchanges().indexOf(stockExchange);
+			if (index != -1) {
+				return new ResponseEntity<CompanyDto>(
+						new CompanyDto("", "Company already listed in exchange.", "", "", null, "", "", null),
+						HttpStatus.BAD_REQUEST);
+			}
+			dto.getStockExchanges().add(stockExchange);
+			dto.getCodeInStockExchange().add(companyCode);
+			CompanyDto resultDto = companyService.updateCompany(dto, dto.getCompanyId());
+			return new ResponseEntity<CompanyDto>(resultDto, HttpStatus.OK);
+		}
+		return new ResponseEntity<CompanyDto>(HttpStatus.NOT_FOUND);
+	}
+}

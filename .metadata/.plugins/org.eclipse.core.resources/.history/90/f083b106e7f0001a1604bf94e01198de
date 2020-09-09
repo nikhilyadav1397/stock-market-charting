@@ -1,0 +1,17 @@
+package com.nikhil.phase3.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+import com.nikhil.phase3.model.StockExchange;
+
+@Repository
+@CrossOrigin(origins = {"http://localhost:4200","http://localhost:8088"})
+public interface StockExchangeRepository extends JpaRepository<StockExchange,String> {
+    public boolean existsByStockExchange(String stockExchange);
+
+	public boolean existsByExchangeId(String id);
+
+	public void deleteByExchangeId(String id);
+}
